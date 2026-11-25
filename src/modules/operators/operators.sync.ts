@@ -33,6 +33,7 @@ const GENDER_MAP: Record<string, string> = {
   男: "Male",
   女: "Female",
   女士: "Female",
+  自称雌性: "Self-identified Female",
   断罪: "Conviction",
   未知: "Unknown",
   未录入: "Unknown",

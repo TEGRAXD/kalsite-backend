@@ -1,0 +1,1 @@
+ALTER TABLE "room_members" ADD COLUMN IF NOT EXISTS "color" varchar(16) DEFAULT '#34d399' NOT NULL;

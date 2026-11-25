@@ -1,0 +1,52 @@
+services:
+  api:
+    container_name: kalsite-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - API_HOST=0.0.0.0
+    command: ["bun", "run", "start"]
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/usr/src/kalsite-backend/uploads
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    networks:
+      - cloudflared_tunnel
+
+  # Optional local PostgreSQL container (start with: docker compose --profile postgres up -d)
+  # Skip this profile if you already run a shared PostgreSQL container on `cloudflared_tunnel` or on the host.
+  postgres:
+    image: postgres:16-alpine
+    container_name: kalsite-postgres
+    profiles:
+      - postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      POSTGRES_DB: ${POSTGRES_DB:-kalsite}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - kalsite_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-kalsite}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - cloudflared_tunnel
+
+volumes:
+  kalsite_pgdata:
+
+networks:
+  cloudflared_tunnel:
+    external: true

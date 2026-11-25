@@ -1,0 +1,1 @@
+ALTER TABLE "operators" ADD COLUMN "latin_name" varchar(100);

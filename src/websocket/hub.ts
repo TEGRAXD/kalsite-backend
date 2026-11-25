@@ -15,8 +15,34 @@ export type KalsiteSocket = ServerWebSocket<WsSocketData>;
 class RealtimeHub {
   // roomId -> Set of sockets
   private readonly rooms = new Map<string, Set<KalsiteSocket>>();
+  // Sockets currently viewing the room browser list
+  private readonly roomListSubscribers = new Set<KalsiteSocket>();
+
+  subscribeRoomList(ws: KalsiteSocket) {
+    if (ws.data.roomId) {
+      this.unsubscribe(ws);
+    }
+    this.roomListSubscribers.add(ws);
+  }
+
+  unsubscribeRoomList(ws: KalsiteSocket) {
+    this.roomListSubscribers.delete(ws);
+  }
+
+  broadcastRoomListUpdated() {
+    if (this.roomListSubscribers.size === 0) return;
+    const raw = JSON.stringify({ event: "rooms:list-updated", payload: {} });
+    for (const ws of this.roomListSubscribers) {
+      try {
+        ws.send(raw);
+      } catch {
+        // Ignore broken sockets
+      }
+    }
+  }
 
   subscribe(ws: KalsiteSocket, roomId: string, roomCode: string) {
+    this.roomListSubscribers.delete(ws);
     if (ws.data.roomId && ws.data.roomId !== roomId) {
       this.unsubscribe(ws);
     }

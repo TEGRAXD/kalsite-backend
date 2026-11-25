@@ -83,6 +83,7 @@ class RoomCleanupManager {
     });
     gameEngine.cleanupRoom(roomId);
     await RoomsRepository.deleteRoom(roomId);
+    realtimeHub.broadcastRoomListUpdated();
     console.log(`[rooms:cleanup] Deleted room ${roomId} (${reason})`);
   }
 

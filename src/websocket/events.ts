@@ -2,6 +2,14 @@ import { z } from "zod";
 
 export const wsClientEventSchema = z.discriminatedUnion("event", [
   z.object({
+    event: z.literal("rooms:subscribe"),
+    payload: z.object({}).optional(),
+  }),
+  z.object({
+    event: z.literal("rooms:unsubscribe"),
+    payload: z.object({}).optional(),
+  }),
+  z.object({
     event: z.literal("room:subscribe"),
     payload: z.object({
       roomCode: z.string().trim().min(4).max(16),

@@ -477,6 +477,8 @@ class GameEngine {
       .set({ status: "finished" })
       .where(eq(rooms.id, state.roomId));
 
+    realtimeHub.broadcastRoomListUpdated();
+
     await this.recordEvent(state.gameId, null, "system", {
       username: SYSTEM_NAME,
       text: endItem.text,

@@ -159,6 +159,7 @@ export const RoomsService = {
     const created = await RoomsRepository.findById(roomId);
     roomCleanup.markActivity(roomId);
     void roomCleanup.onRoomBecameEmpty(roomId);
+    realtimeHub.broadcastRoomListUpdated();
     return formatRoomDetail(created!, true);
   },
 
@@ -228,6 +229,7 @@ export const RoomsService = {
       role,
     });
     realtimeHub.broadcastRoomUpdated(detail);
+    realtimeHub.broadcastRoomListUpdated();
 
     return detail;
   },
@@ -262,6 +264,7 @@ export const RoomsService = {
       username: user.username,
     });
     realtimeHub.broadcastRoomUpdated(detail);
+    realtimeHub.broadcastRoomListUpdated();
 
     return detail;
   },
@@ -338,6 +341,7 @@ export const RoomsService = {
     const updated = await RoomsRepository.findById(room.id);
     const detail = formatRoomDetail(updated!, true);
     realtimeHub.broadcastRoomUpdated(detail);
+    realtimeHub.broadcastRoomListUpdated();
     return detail;
   },
 
@@ -454,6 +458,7 @@ export const RoomsService = {
     const detail = formatRoomDetail(refreshed!, true);
     roomCleanup.markActivity(room.id);
     realtimeHub.broadcastRoomUpdated(detail);
+    realtimeHub.broadcastRoomListUpdated();
 
     return {
       room: detail,
@@ -498,6 +503,7 @@ export const RoomsService = {
     const detail = formatRoomDetail(refreshed!, true);
     roomCleanup.markActivity(room.id);
     realtimeHub.broadcastRoomUpdated(detail);
+    realtimeHub.broadcastRoomListUpdated();
 
     return {
       room: detail,
@@ -553,6 +559,7 @@ export const RoomsService = {
 
     realtimeHub.broadcast(room.id, "room:returned-to-lobby", { room: detail });
     realtimeHub.broadcastRoomUpdated(detail);
+    realtimeHub.broadcastRoomListUpdated();
 
     return { room: detail };
   },

@@ -58,6 +58,16 @@ export const websocketHandler: WebSocketHandler<WsSocketData> = {
     const displayName = ws.data.globalName || ws.data.username;
 
     try {
+      if (msg.event === "rooms:subscribe") {
+        realtimeHub.subscribeRoomList(ws);
+        return;
+      }
+
+      if (msg.event === "rooms:unsubscribe") {
+        realtimeHub.unsubscribeRoomList(ws);
+        return;
+      }
+
       if (msg.event === "room:subscribe") {
         const room = await RoomsRepository.findByCode(msg.payload.roomCode);
         if (!room) {
@@ -266,6 +276,7 @@ export const websocketHandler: WebSocketHandler<WsSocketData> = {
   async close(ws) {
     const roomId = ws.data.roomId;
     const roomCode = ws.data.roomCode;
+    realtimeHub.unsubscribeRoomList(ws);
     realtimeHub.unsubscribe(ws);
     if (roomId && realtimeHub.getOnlineUserIds(roomId).size === 0) {
       void roomCleanup.onRoomBecameEmpty(roomId);

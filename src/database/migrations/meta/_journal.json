@@ -64,6 +64,13 @@
       "when": 1795593919103,
       "tag": "0008_roles_and_user_role",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795643774897,
+      "tag": "0009_operator_gender_race",
+      "breakpoints": true
     }
   ]
 }

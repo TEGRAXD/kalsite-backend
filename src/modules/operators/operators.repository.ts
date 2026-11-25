@@ -30,6 +30,8 @@ export const OperatorsRepository = {
           ilike(operators.operatorClass, pattern),
           ilike(operators.branch, pattern),
           ilike(operators.faction, pattern),
+          ilike(operators.gender, pattern),
+          ilike(operators.race, pattern),
         )!,
       );
     }

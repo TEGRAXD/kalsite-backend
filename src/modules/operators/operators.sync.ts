@@ -29,7 +29,93 @@ export const ARKNIGHTS_RESOURCE_BASE = (
 const NON_LATIN_SCRIPT_RE =
   /[\u0400-\u04FF\u0370-\u03FF\u3040-\u30FF\u4E00-\u9FFF\uAC00-\uD7AF]/;
 
-async function fetchHandbookReleaseOrderMap(): Promise<Record<string, number>> {
+const GENDER_MAP: Record<string, string> = {
+  男: "Male",
+  女: "Female",
+  女士: "Female",
+  断罪: "Conviction",
+  未知: "Unknown",
+  未录入: "Unknown",
+  未公开: "Undisclosed",
+};
+
+const RACE_MAP: Record<string, string> = {
+  菲林: "Feline",
+  黎博利: "Liberi",
+  萨卡兹: "Sarkaz",
+  佩洛: "Perro",
+  沃尔珀: "Vulpo",
+  阿戈尔: "Aegir",
+  库兰塔: "Kuranta",
+  鲁珀: "Lupo",
+  乌萨斯: "Ursus",
+  卡特斯: "Cautus",
+  札拉克: "Zalak",
+  卡普里尼: "Caprinae",
+  萨科塔: "Sankta",
+  斐迪亚: "Pythia",
+  丰蹄: "Forte",
+  埃拉菲亚: "Elafia",
+  瓦伊凡: "Vouivre",
+  鬼: "Oni",
+  萨弗拉: "Savra",
+  杜林: "Durin",
+  阿纳缇: "Anaty",
+  阿达克利斯: "Archosauria",
+  龙: "Lung",
+  德拉克: "Draco",
+  瑞柏巴: "Reproba",
+  阿斯兰: "Aslan",
+  麒麟: "Kylin",
+  精灵: "Elf",
+  曼提柯: "Manticore",
+  依特拉: "Itra",
+  安努拉: "Anura",
+  匹特拉姆: "Petram",
+  "卡特斯/奇美拉": "Cautus / Chimera",
+  皮洛萨: "Pilosa",
+  塞拉托: "Cerato",
+  阿纳萨: "Anasa",
+  "长身人（自称）": "Tall-man",
+  "半身人（自称）": "Halfling",
+  "矮人（自称）": "Dwarf",
+  "佩洛兽亲（据称）": "Perro",
+  "未知（疑似黎博利）": "Unknown (Liberi?)",
+  未公开: "Undisclosed",
+  因经纪公司要求不公开: "Undisclosed",
+  未知: "Unknown",
+  未录入: "Unknown",
+  不明: "Unknown",
+};
+
+interface HandbookOperatorMeta {
+  releaseOrder: number;
+  gender: string | null;
+  race: string | null;
+}
+
+function parseHandbookGender(story: string): string | null {
+  const match = story.match(/【(?:设定)?性别】\s*([^\n\r]+)/);
+  if (!match) return null;
+  const raw = match[1]!.trim();
+  return GENDER_MAP[raw] ?? raw.slice(0, 30);
+}
+
+function parseHandbookRace(story: string): string | null {
+  const match = story.match(/【种族】\s*([^\n\r]+)/);
+  if (match) {
+    const raw = match[1]!.trim();
+    return RACE_MAP[raw] ?? raw.slice(0, 60);
+  }
+  if (/【(?:出厂|型号|产地)】/.test(story)) {
+    return "Robot";
+  }
+  return null;
+}
+
+async function fetchHandbookMetaMap(): Promise<
+  Record<string, HandbookOperatorMeta>
+> {
   const url = `${ARKNIGHTS_RESOURCE_BASE}/gamedata/excel/handbook_info_table.json`;
   try {
     const res = await fetch(url, {
@@ -38,12 +124,24 @@ async function fetchHandbookReleaseOrderMap(): Promise<Record<string, number>> {
     });
     if (!res.ok) return {};
     const data = (await res.json()) as {
-      handbookDict?: Record<string, unknown>;
+      handbookDict?: Record<
+        string,
+        {
+          storyTextAudio?: Array<{
+            stories?: Array<{ storyText?: string }>;
+          }>;
+        }
+      >;
     };
-    const keys = Object.keys(data.handbookDict ?? {});
-    const map: Record<string, number> = {};
-    keys.forEach((charId, idx) => {
-      map[charId] = idx + 1;
+    const entries = Object.entries(data.handbookDict ?? {});
+    const map: Record<string, HandbookOperatorMeta> = {};
+    entries.forEach(([charId, entry], idx) => {
+      const story = entry?.storyTextAudio?.[0]?.stories?.[0]?.storyText ?? "";
+      map[charId] = {
+        releaseOrder: idx + 1,
+        gender: parseHandbookGender(story),
+        race: parseHandbookRace(story),
+      };
     });
     return map;
   } catch (err) {
@@ -415,11 +513,11 @@ async function runSyncOperatorsFromGitHub(options?: {
   const charTableUrl = `${ARKNIGHTS_RESOURCE_BASE}/gamedata/excel/character_table.json`;
   console.log(`[operators:sync] Fetching ${charTableUrl}...`);
 
-  const [res, releaseOrderMap, teamMap] = await Promise.all([
+  const [res, handbookMetaMap, teamMap] = await Promise.all([
     fetch(charTableUrl, {
       headers: { "User-Agent": "kalsite-operator-sync" },
     }),
-    fetchHandbookReleaseOrderMap(),
+    fetchHandbookMetaMap(),
     fetchHandbookTeamMap(),
   ]);
   if (!res.ok) {
@@ -509,8 +607,10 @@ async function runSyncOperatorsFromGitHub(options?: {
         branch: resolveBranchName(char.subProfessionId).slice(0, 60),
         faction,
         factionLogoUrl,
+        gender: handbookMetaMap[charId]?.gender ?? null,
+        race: handbookMetaMap[charId]?.race ?? null,
         imageUrl: `/uploads/operators/${filename}`,
-        releaseOrder: releaseOrderMap[charId] ?? null,
+        releaseOrder: handbookMetaMap[charId]?.releaseOrder ?? null,
         isEnabled: true,
       },
       filename,
@@ -574,6 +674,8 @@ async function runSyncOperatorsFromGitHub(options?: {
           branch: sql`excluded.branch`,
           faction: sql`COALESCE(excluded.faction, ${operators.faction})`,
           factionLogoUrl: sql`COALESCE(excluded.faction_logo_url, ${operators.factionLogoUrl})`,
+          gender: sql`COALESCE(excluded.gender, ${operators.gender})`,
+          race: sql`COALESCE(excluded.race, ${operators.race})`,
           imageUrl: sql`excluded.image_url`,
           releaseOrder: sql`COALESCE(excluded.release_order, ${operators.releaseOrder})`,
           isEnabled: true,

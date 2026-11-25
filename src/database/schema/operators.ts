@@ -20,6 +20,8 @@ export const operators = pgTable(
     branch: varchar("branch", { length: 60 }).notNull(),
     faction: varchar("faction", { length: 80 }),
     factionLogoUrl: varchar("faction_logo_url", { length: 500 }),
+    gender: varchar("gender", { length: 30 }),
+    race: varchar("race", { length: 60 }),
     imageUrl: varchar("image_url", { length: 500 }).notNull(),
     releaseOrder: integer("release_order"),
     isEnabled: boolean("is_enabled").default(true).notNull(),
@@ -29,6 +31,8 @@ export const operators = pgTable(
     index("operators_class_idx").on(table.operatorClass),
     index("operators_rarity_idx").on(table.rarity),
     index("operators_faction_idx").on(table.faction),
+    index("operators_gender_idx").on(table.gender),
+    index("operators_race_idx").on(table.race),
     index("operators_release_order_idx").on(table.releaseOrder),
   ],
 );

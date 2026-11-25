@@ -71,6 +71,8 @@ export const OperatorsService = {
       operatorClass: input.operatorClass,
       branch: input.branch,
       faction: input.faction ?? null,
+      gender: input.gender ?? null,
+      race: input.race ?? null,
       imageUrl,
       releaseOrder: input.releaseOrder ?? null,
       isEnabled: true,
@@ -129,6 +131,8 @@ export const OperatorsService = {
       operatorClass: input.operatorClass ?? existing.operatorClass,
       branch: input.branch ?? existing.branch,
       faction: input.faction !== undefined ? input.faction : existing.faction,
+      gender: input.gender !== undefined ? input.gender : existing.gender,
+      race: input.race !== undefined ? input.race : existing.race,
       imageUrl,
       releaseOrder:
         input.releaseOrder !== undefined

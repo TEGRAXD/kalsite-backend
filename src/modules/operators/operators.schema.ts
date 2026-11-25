@@ -41,6 +41,18 @@ export const createOperatorSchema = z.object({
     .max(80)
     .optional()
     .transform((v) => (v && v.length > 0 ? v : undefined)),
+  gender: z
+    .string()
+    .trim()
+    .max(30)
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
+  race: z
+    .string()
+    .trim()
+    .max(60)
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
   releaseOrder: z.coerce.number().int().optional(),
   sourceImageUrl: z
     .string()
@@ -72,6 +84,20 @@ export const updateOperatorSchema = z.object({
     .string()
     .trim()
     .max(80)
+    .nullable()
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v && v.length > 0 ? v : null)),
+  gender: z
+    .string()
+    .trim()
+    .max(30)
+    .nullable()
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v && v.length > 0 ? v : null)),
+  race: z
+    .string()
+    .trim()
+    .max(60)
     .nullable()
     .optional()
     .transform((v) => (v === undefined ? undefined : v && v.length > 0 ? v : null)),

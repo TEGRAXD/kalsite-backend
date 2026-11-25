@@ -153,7 +153,7 @@ docker compose --profile postgres up -d --build
 docker compose exec api bun run db:setup
 ```
 
-Operator avatars and faction logos are persisted across rebuilds via the `kalsite_uploads` Docker named volume.
+Operator avatars and faction logos are shared two-way between the host and container via the `./uploads:/usr/src/kalsite-backend/uploads` bind mount.
 
 ### 5. Cloudflare Tunnel routing
 

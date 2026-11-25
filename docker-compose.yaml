@@ -14,13 +14,10 @@ services:
       # HOST:CONTAINER (OUTSIDE:INSIDE) — Docker cloudflared uses the RIGHT port: http://kalsite-backend:5000
       - "5000:5000"
     volumes:
-      - kalsite_uploads:/usr/src/kalsite-backend/uploads
+      - ./uploads:/usr/src/kalsite-backend/uploads
     restart: unless-stopped
     networks:
       - cloudflared_tunnel
-
-volumes:
-  kalsite_uploads:
 
 networks:
   cloudflared_tunnel:

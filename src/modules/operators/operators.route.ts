@@ -1,6 +1,11 @@
 import { Hono } from "hono";
+import { ROLE_IDS } from "../../database";
 import { BadRequestError } from "../../errors";
-import { requireAdmin, requireAuth } from "../../middlewares/auth";
+import {
+  requireAdmin,
+  requireAuth,
+  type AuthVariables,
+} from "../../middlewares/auth";
 import { successResponse } from "../../utils/response";
 import {
   createOperatorSchema,
@@ -9,7 +14,19 @@ import {
 } from "./operators.schema";
 import { OperatorsService } from "./operators.service";
 
-export const operatorsRoutes = new Hono();
+export const operatorsRoutes = new Hono<{ Variables: Partial<AuthVariables> }>();
+
+function canViewDisabled(c: {
+  get: <K extends keyof AuthVariables>(key: K) => AuthVariables[K] | undefined;
+}): boolean {
+  if (c.get("isApiKeyAuth")) return true;
+  const user = c.get("user");
+  return Boolean(
+    user &&
+      (user.roleId === ROLE_IDS.ADMIN ||
+        user.roleId === ROLE_IDS.SUPER_ADMIN),
+  );
+}
 
 async function parseOperatorPayload(c: {
   req: {
@@ -39,12 +56,15 @@ operatorsRoutes.get("/", async (c) => {
 
   const rarity = rarityParam ? Number.parseInt(rarityParam, 10) : undefined;
   const limit = limitParam ? Number.parseInt(limitParam, 10) : undefined;
+  const wantsDisabled = c.req.query("includeDisabled") === "true";
+  const includeDisabled = wantsDisabled && canViewDisabled(c);
 
   const list = await OperatorsService.list({
     search,
     operatorClass,
     rarity: Number.isNaN(rarity) ? undefined : rarity,
     limit: Number.isNaN(limit) ? undefined : limit,
+    includeDisabled,
   });
 
   return c.json(successResponse("Operators retrieved successfully", list));
@@ -112,6 +132,11 @@ operatorsRoutes.delete("/:id", requireAuth, requireAdmin, async (c) => {
 });
 
 operatorsRoutes.get("/:slug", async (c) => {
-  const operator = await OperatorsService.getBySlug(c.req.param("slug"));
+  const wantsDisabled = c.req.query("includeDisabled") === "true";
+  const includeDisabled = wantsDisabled && canViewDisabled(c);
+  const operator = await OperatorsService.getBySlug(
+    c.req.param("slug"),
+    includeDisabled,
+  );
   return c.json(successResponse("Operator retrieved successfully", operator));
 });

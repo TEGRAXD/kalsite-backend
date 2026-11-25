@@ -19,8 +19,10 @@ export const OperatorsService = {
     return OperatorsRepository.findMany(filter);
   },
 
-  async getBySlug(slug: string) {
-    const op = await OperatorsRepository.findBySlug(slug);
+  async getBySlug(slug: string, includeDisabled = false) {
+    const op = includeDisabled
+      ? await OperatorsRepository.findBySlugAny(slug)
+      : await OperatorsRepository.findBySlug(slug);
     if (!op) {
       throw new NotFoundError("Operator not found");
     }
@@ -128,7 +130,10 @@ export const OperatorsService = {
       branch: input.branch ?? existing.branch,
       faction: input.faction !== undefined ? input.faction : existing.faction,
       imageUrl,
-      releaseOrder: input.releaseOrder ?? existing.releaseOrder,
+      releaseOrder:
+        input.releaseOrder !== undefined
+          ? input.releaseOrder
+          : existing.releaseOrder,
       isEnabled: input.isEnabled ?? existing.isEnabled,
     });
   },

@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { BadRequestError } from "../../errors";
-import { requireAuth } from "../../middlewares/auth";
+import { requireAdmin, requireAuth } from "../../middlewares/auth";
 import { successResponse } from "../../utils/response";
 import {
   createOperatorSchema,
@@ -51,7 +51,7 @@ operatorsRoutes.get("/", async (c) => {
 });
 
 // Pull latest character_table.json + download missing avatars from fexli/ArknightsResource
-operatorsRoutes.post("/sync", requireAuth, async (c) => {
+operatorsRoutes.post("/sync", requireAuth, requireAdmin, async (c) => {
   const rawBody = await c.req.json().catch(() => ({}));
   const parsed = syncOperatorsSchema.safeParse(rawBody);
   if (!parsed.success) {
@@ -71,7 +71,7 @@ operatorsRoutes.post("/sync", requireAuth, async (c) => {
 });
 
 // Manually add an Operator (supports JSON or multipart/form-data with `image` file)
-operatorsRoutes.post("/", requireAuth, async (c) => {
+operatorsRoutes.post("/", requireAuth, requireAdmin, async (c) => {
   const { body, imageFile } = await parseOperatorPayload(c);
   const parsed = createOperatorSchema.safeParse(body);
   if (!parsed.success) {
@@ -84,7 +84,7 @@ operatorsRoutes.post("/", requireAuth, async (c) => {
   return c.json(successResponse("Operator created successfully", created), 201);
 });
 
-operatorsRoutes.patch("/:id", requireAuth, async (c) => {
+operatorsRoutes.patch("/:id", requireAuth, requireAdmin, async (c) => {
   const { body, imageFile } = await parseOperatorPayload(c);
   const parsed = updateOperatorSchema.safeParse(body);
   if (!parsed.success) {
@@ -101,7 +101,7 @@ operatorsRoutes.patch("/:id", requireAuth, async (c) => {
   return c.json(successResponse("Operator updated successfully", updated));
 });
 
-operatorsRoutes.delete("/:id", requireAuth, async (c) => {
+operatorsRoutes.delete("/:id", requireAuth, requireAdmin, async (c) => {
   const result = await OperatorsService.remove(c.req.param("id"));
   return c.json(
     successResponse(

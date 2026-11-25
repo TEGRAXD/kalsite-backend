@@ -29,6 +29,7 @@ const server = Bun.serve<WsSocketData>({
           username: user.username,
           globalName: user.globalName,
           avatar: user.avatar,
+          roleId: user.roleId,
           roomId: null,
           roomCode: null,
         },

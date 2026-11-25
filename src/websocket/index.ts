@@ -95,7 +95,9 @@ export const websocketHandler: WebSocketHandler<WsSocketData> = {
           username: ws.data.username,
           globalName: ws.data.globalName,
           avatar: ws.data.avatar,
+          roleId: ws.data.roleId,
           createdAt: new Date(),
+          updatedAt: new Date(),
         });
 
         realtimeHub.broadcastRoomUpdated(refreshed.room);
@@ -136,7 +138,9 @@ export const websocketHandler: WebSocketHandler<WsSocketData> = {
               username: ws.data.username,
               globalName: ws.data.globalName,
               avatar: ws.data.avatar,
+              roleId: ws.data.roleId,
               createdAt: new Date(),
+              updatedAt: new Date(),
             },
             roomId,
             msg.payload.color,
@@ -152,7 +156,9 @@ export const websocketHandler: WebSocketHandler<WsSocketData> = {
               username: ws.data.username,
               globalName: ws.data.globalName,
               avatar: ws.data.avatar,
+              roleId: ws.data.roleId,
               createdAt: new Date(),
+              updatedAt: new Date(),
             },
             roomId,
             msg.payload.ready,

@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import {
-  optionalAuth,
   requireAuth,
   type AuthVariables,
 } from "../../middlewares/auth";
@@ -14,6 +13,8 @@ import {
 import { RoomsService } from "./rooms.service";
 
 export const roomsRoutes = new Hono<{ Variables: Partial<AuthVariables> }>();
+
+roomsRoutes.use("*", requireAuth);
 
 roomsRoutes.get("/", async (c) => {
   const search = c.req.query("search")?.trim() || undefined;
@@ -30,9 +31,9 @@ roomsRoutes.get("/", async (c) => {
   return c.json(successResponse("Rooms retrieved successfully", list));
 });
 
-roomsRoutes.get("/:code", optionalAuth, async (c) => {
+roomsRoutes.get("/:code", async (c) => {
   const code = c.req.param("code");
-  const viewer = c.get("user");
+  const viewer = c.get("user")!;
   const result = await RoomsService.getRoomByCode(code, viewer);
   return c.json(successResponse("Room retrieved successfully", result));
 });

@@ -6,6 +6,7 @@ export interface WsSocketData {
   username: string;
   globalName: string | null;
   avatar: string | null;
+  roleId: string;
   roomId: string | null;
   roomCode: string | null;
 }

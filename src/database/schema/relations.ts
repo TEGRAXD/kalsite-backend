@@ -1,4 +1,5 @@
 import { relations } from "drizzle-orm";
+import { roles } from "./roles";
 import { users } from "./users";
 import { sessions } from "./sessions";
 import { rooms } from "./rooms";
@@ -8,7 +9,15 @@ import { gamePlayers } from "./game-players";
 import { gameEvents } from "./game-events";
 import { operators } from "./operators";
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const rolesRelations = relations(roles, ({ many }) => ({
+  users: many(users),
+}));
+
+export const usersRelations = relations(users, ({ one, many }) => ({
+  role: one(roles, {
+    fields: [users.roleId],
+    references: [roles.id],
+  }),
   sessions: many(sessions),
   hostedRooms: many(rooms),
   roomMemberships: many(roomMembers),

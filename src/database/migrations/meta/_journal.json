@@ -57,6 +57,13 @@
       "when": 1795580900860,
       "tag": "0007_room_member_color",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795593919103,
+      "tag": "0008_roles_and_user_role",
+      "breakpoints": true
     }
   ]
 }

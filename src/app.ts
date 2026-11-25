@@ -4,7 +4,8 @@ import { cors } from "hono/cors";
 import { getCookie } from "hono/cookie";
 import { env } from "./config";
 import { AppError } from "./errors";
-import { resolveSessionUser } from "./middlewares/auth";
+import { apiGuard, resolveSessionUser } from "./middlewares/auth";
+import { adminModule } from "./modules/admin";
 import { authModule } from "./modules/auth";
 import { sanitizeUser } from "./modules/auth/auth.route";
 import { operatorsModule } from "./modules/operators";
@@ -13,6 +14,7 @@ import {
   OPERATOR_UPLOADS_DIR,
 } from "./modules/operators/operators.sync";
 import { roomsModule } from "./modules/rooms";
+import { usersModule } from "./modules/users";
 import { errorResponse, successResponse } from "./utils/response";
 
 export const app = new Hono();
@@ -23,9 +25,11 @@ app.use(
     origin: env.WEB_URL,
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
+    allowHeaders: ["Content-Type", "Authorization", "x-api-key"],
   }),
 );
+
+app.use("*", apiGuard);
 
 app.get("/", (c) =>
   c.json(
@@ -98,6 +102,8 @@ app.get("/uploads/factions/:filename", async (c) => {
 app.route("/auth", authModule);
 app.route("/operators", operatorsModule);
 app.route("/rooms", roomsModule);
+app.route("/users", usersModule);
+app.route("/admin", adminModule);
 
 app.notFound((c) => c.json(errorResponse("Endpoint not found"), 404));
 

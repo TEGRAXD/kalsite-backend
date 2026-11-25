@@ -60,6 +60,8 @@ Copy `.env.example` to `.env` and configure:
 | `DISCORD_CLIENT_SECRET` | *(empty)* | Discord OAuth2 application client secret |
 | `DISCORD_REDIRECT_URI` | `http://localhost:5000/auth/discord/callback` | Discord OAuth2 callback URL |
 | `SESSION_SECRET` | `kalsite-dev-session-secret-...` | Random secret for session signing (change in production) |
+| `API_SECRET_KEY` | `kalsite-dev-api-secret-...` | Server-to-server API key for `apiGuard` (must match frontend `API_SECRET_KEY`) |
+| `SUPER_ADMIN_DISCORD_IDS` | *(empty)* | Comma-separated Discord IDs (or `dev:username` in dev) auto-promoted to `super-administrator` |
 | `ALLOW_DEV_LOGIN` | `true` | Enables codename dev login without Discord (`false` in production) |
 | `SYSTEM_NAME` | `ZOOT` | System announcer label in match feeds |
 

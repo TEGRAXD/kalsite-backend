@@ -1,4 +1,5 @@
 import { pgTable, varchar, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { roles, ROLE_IDS } from "./roles";
 
 export const users = pgTable(
   "users",
@@ -8,7 +9,14 @@ export const users = pgTable(
     username: varchar("username", { length: 100 }).notNull(),
     globalName: varchar("global_name", { length: 100 }),
     avatar: varchar("avatar", { length: 255 }),
+    roleId: varchar("role_id", { length: 40 })
+      .notNull()
+      .default(ROLE_IDS.USER)
+      .references(() => roles.id),
     createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },

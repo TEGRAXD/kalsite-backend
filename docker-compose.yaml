@@ -11,6 +11,7 @@ services:
       - API_HOST=0.0.0.0
     command: ["bun", "run", "start"]
     ports:
+      # HOST:CONTAINER (OUTSIDE:INSIDE) — Docker cloudflared uses the RIGHT port: http://kalsite-backend:5000
       - "5000:5000"
     volumes:
       - kalsite_uploads:/usr/src/kalsite-backend/uploads
